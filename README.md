@@ -22,12 +22,30 @@ the rooms.
 > You should have received a copy of the GNU Affero General Public License
 > along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-## Dev Quick Start
+### Architectural Overview
 
-You will need to create a Discord server for your event, and then obtain an
-OAuth2 secret for Discord to develop this. You can
-[grab your own](https://discord.com/developers/docs/topics/oauth2), and then
-create a `.env` file at the root of the project with content like:
+The app is a Django app, with the core grid being served as a rich React app
+with communication over GraphQL. Channels is used to support websockets and
+GraphQL subscriptions for pushing state to the connected clients.
+
+Celery is used to schedule and run timed events (such as doors open, and
+rooms changing in the schedule) in the background, with Redis as the
+communication mechanism (for both Celery messages, and Channels's message
+layers for pushing state changes to connected clients).
+
+The codebase is monolithic, but the architecture is such that it can be
+scaled horizontally through multiple instances of the app behind a load
+balancer, with Postgres and Redis holding state, rather than relying on a
+single process. The intention is for this is to be deployed on some sort of
+container platform, and the CI server outputs a single Docker image which can
+be started with multiple invocations to take on the key roles.
+## Setting up a Discord bot
+
+You will need to create a Discord server for your event, a role for event 
+moderators to use, and then obtain an OAuth2 secret from Discord.
+
+Clone the repository and create an `.env` file at the root of the project 
+with the following values that we are now going to get:
 
 ```
 DISCORD_OAUTH_CLIENT_ID=123456
@@ -38,15 +56,34 @@ DISCORD_MODERATOR_ROLE_ID=741674771070320720
 DISCORD_WELCOME_CHANNEL_ID=721357132787875932
 ```
 
-You should also create a Discord role that corresponds to the role your
-volunteers will have.
+[Register a new bot here](https://discord.com/developers/applications). Then:
 
-Or, if you know Chris and she trusts you, she can share the BarCamp Manchester
-ones with you privately.
+Go to “OAuth2” on the left menu
 
-Now, you can start a local dev environment:
+- Client ID → DISCORD_OAUTH_CLIENT_ID
+- Client secret → DISCORD_OAUTH_CLIENT_SECRET (you’ll need to reset it)
 
-1. Make sure you have Docker, Poetry and Yarn installed locally
+Go to “Bot” in the left menu
+
+- Add a bot
+- Give it a snappy username
+- Token → DISCORD_OAUTH_BOT_TOKEN (you’ll need to reset it)
+
+In Discord
+
+- Go to `User Settings → Advanced` and enable developer mode
+- Right click server name and copy ID → DISCORD_GUILD_ID
+- Right click the role tag you want for the moderators and copy id → DISCORD_MODERATOR_ROLE_ID
+- Right click the welcome channel and copy id → DISCORD_WELCOME_CHANNEL_ID
+
+You've now got all the values you need to proceed.
+
+## Setting up a local server
+
+Now, you can start a local dev environment to test everything works:
+
+1. Make sure you have Docker, [Poetry](https://python-poetry.org/docs/#installation) 
+   and [Yarn](https://yarnpkg.com/) installed locally
 2. Run `poetry install` and `yarn` in the root to have local copies of the
    dependencies installed (for your IDE, etc).
 3. Run `docker-compose up`
@@ -74,48 +111,35 @@ Now, you can start a local dev environment:
 4. You will now have access to http://localhost:8000/admin/. You can use the
    admin screen to give other people staff/superuser access to the admin.
 
-### Architectural Overview
+## Setting up a production server
 
-The app is a Django app, with the core grid being served as a rich React app
-with communication over GraphQL. Channels is used to support websockets and
-GraphQL subscriptions for pushing state to the connected clients.
+Create a file like this called `infrastructure/secrets.tfvars`. `Fill in the discord_*`
+values you already got.
 
-Celery is used to schedule and run timed events (such as doors open, and
-rooms changing in the schedule) in the background, with Redis as the
-communication mechanism (for both Celery messages, and Channels's message
-layers for pushing state changes to connected clients).
+```
+do_token                     = "..."
+gitlab_deploy_token_username = "..."
+gitlab_deploy_token_password = "..."
+discord_oauth_client_id      = "..."
+discord_oauth_client_secret  = "..."
+discord_oauth_bot_token      = "..."
+discord_guild_id             = "..."
+discord_moderator_role_id    = "..."
+discord_welcome_channel_id   = "..."
+app_hostname                 = "online.barcampmanchester.co.uk"
+letsencrypt_account_email    = "you@myemail.com"
+```
 
-The codebase is monolithic, but the architecture is such that it can be
-scaled horizontally through multiple instances of the app behind a load
-balancer, with Postgres and Redis holding state, rather than relying on a
-single process. The intention is for this is to be deployed on some sort of
-container platform, and the CI server outputs a single Docker image which can
-be started with multiple invocations to take on the key roles.
-
-### Deploying
-
-1. Install Terraform and create a DigitalOcean account, obtaining a token.
-2. Install doctl and then `doctl auth init` using your DO token.
-3. Add NS records for the subdomain you want to `ns{1,2,3}.digitalocean.com`
-4. Create a GitLab token with the read_registry permission
-5. Create a `infrastructure/secrets.tfvars` file that looks a bit like:
-   ```
-   do_token                     = "..."
-   gitlab_deploy_token_username = "..."
-   gitlab_deploy_token_password = "..."
-   discord_oauth_client_id      = "..."
-   discord_oauth_client_secret  = "..."
-   discord_oauth_bot_token      = "..."
-   discord_guild_id             = "..."
-   discord_moderator_role_id    = "..."
-   discord_welcome_channel_id   = "..."
-   app_hostname                 = "online.barcampmanchester.co.uk"
-   letsencrypt_account_email    = "you@myemail.com"
-   ```
-6. `terraform init` (on first run only)
-7. `terraform apply -var-file secrets.tfvars` and enter the version of the app
+1. Install [Terraform](https://www.terraform.io/)
+1. Create a DigitalOcean account. Log in and select 'API' on the left sidebar,
+   then create a new token.
+1. Install doctl and then `doctl auth init` using your DO token.
+1. Add NS records for the subdomain you want to `ns{1,2,3}.digitalocean.com`
+1. Create a GitLab token with the read_registry permission
+1. `terraform init` (on first run only)
+1. `terraform apply -var-file secrets.tfvars` and enter the version of the app
    you wish to deploy
-8. If you have any migrations you need to apply, then you can run these like so:<br>
+1. If you have any migrations you need to apply, then you can run these like so:<br>
    `doctl kubernetes cluster kubeconfig save virtualbarcamp` (to log in to the cluster)<br>
    `kubectl get pod` and find the name of the pod starting `virtualbarcamp-www`<br>
    `kubectl exec virtualbarcamp-www-<pod-full-name> -- /app/init.sh migrate`
