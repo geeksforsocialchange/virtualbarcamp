@@ -41,7 +41,7 @@ DISCORD_WELCOME_CHANNEL_ID=721357132787875932
 You should also create a Discord role that corresponds to the role your
 volunteers will have.
 
-Or, if you know Chris and he trusts you, he can share the BarCamp Manchester
+Or, if you know Chris and she trusts you, she can share the BarCamp Manchester
 ones with you privately.
 
 Now, you can start a local dev environment:
