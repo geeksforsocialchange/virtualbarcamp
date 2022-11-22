@@ -25,7 +25,7 @@ the rooms.
 ## Dev Quick Start
 
 You will need to create a Discord server for your event, and then obtain an
-OAuth2 secret for Discord to develop this. You can either
+OAuth2 secret for Discord to develop this. You can
 [grab your own](https://discord.com/developers/docs/topics/oauth2), and then
 create a `.env` file at the root of the project with content like:
 
