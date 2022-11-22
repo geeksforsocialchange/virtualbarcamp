@@ -39,6 +39,7 @@ balancer, with Postgres and Redis holding state, rather than relying on a
 single process. The intention is for this is to be deployed on some sort of
 container platform, and the CI server outputs a single Docker image which can
 be started with multiple invocations to take on the key roles.
+
 ## Setting up a Discord bot
 
 You will need to create a Discord server for your event, a role for event 
@@ -132,22 +133,33 @@ letsencrypt_account_email    = "you@myemail.com"
 
 1. Install [Terraform](https://www.terraform.io/)
 1. Create a DigitalOcean account. Log in and select 'API' on the left sidebar,
-   then create a new token.
-1. Install doctl and then `doctl auth init` using your DO token.
-1. Add NS records for the subdomain you want to `ns{1,2,3}.digitalocean.com`
-1. Create a GitLab token with the read_registry permission
+   then create a new token. This is `do_token`.
+1. Install [doctl](https://docs.digitalocean.com/reference/doctl/) and then 
+   `doctl auth init` using the DO token you just created.
+1. Add three NS records for the subdomain you want to point to `ns1.digitalocean.com`,
+   `ns2.digitalocean.com` and `ns3.digitalocean.com`
+1. Create a [GitLab account](https://gitlab.com) if you don't have one already
+1. Create a new repository with for your bot
+1. [Create a token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token) 
+   with the read_registry permission. This is token_username and token_password.
+1. `cd terraform`
 1. `terraform init` (on first run only)
 1. `terraform apply -var-file secrets.tfvars` and enter the version of the app
-   you wish to deploy
-1. If you have any migrations you need to apply, then you can run these like so:<br>
-   `doctl kubernetes cluster kubeconfig save virtualbarcamp` (to log in to the cluster)<br>
-   `kubectl get pod` and find the name of the pod starting `virtualbarcamp-www`<br>
-   `kubectl exec virtualbarcamp-www-<pod-full-name> -- /app/init.sh migrate`
+   you wish to deploy (e.g. `1`)
+1. If you have any migrations you need to apply, then you can run these like so:
+
+```
+doctl kubernetes cluster kubeconfig save virtualbarcamp # (to log in to the cluster)
+kubectl get pod # and find the name of the pod starting virtualbarcamp-www
+kubectl exec virtualbarcamp-www-<pod-full-name> -- /app/init.sh migrate
+```
 
 If you need to scale, you can do so by overriding the default number of
 workers, or default node size like so:
 
-    terraform apply -var-file secrets.tfvars
+```
+terraform apply -var-file secrets.tfvars
+```
 
 ## Event Runbook
 

@@ -8,6 +8,7 @@ node_modules/
 build/
 /static/
 schema.json
+infrastructure/.terraform.lock.hcl
 infrastructure/.terraform/
 infrastructure/*.tfstate*
 infrastructure/secrets.tfvars
