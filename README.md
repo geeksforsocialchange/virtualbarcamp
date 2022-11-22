@@ -114,7 +114,7 @@ Now, you can start a local dev environment to test everything works:
 
 ## Setting up a production server
 
-Create a file like this called `infrastructure/secrets.tfvars`. `Fill in the discord_*`
+Create a file like this called `infrastructure/secrets.tfvars`. Fill in the `discord_*`
 values you already got.
 
 ```
