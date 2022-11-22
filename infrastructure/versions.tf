@@ -4,7 +4,8 @@ terraform {
       source = "digitalocean/digitalocean"
     }
     acme = {
-      source = "vancluever/acme"
+      source  = "vancluever/acme"
+      version = ">= 2.1.2"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"

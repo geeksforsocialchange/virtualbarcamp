@@ -24,7 +24,6 @@ variable "do_region" {
 data "digitalocean_kubernetes_versions" "versions" {}
 
 provider "kubernetes" {
-  load_config_file = false
   host             = digitalocean_kubernetes_cluster.virtualbarcamp.endpoint
   token            = digitalocean_kubernetes_cluster.virtualbarcamp.kube_config[0].token
   cluster_ca_certificate = base64decode(

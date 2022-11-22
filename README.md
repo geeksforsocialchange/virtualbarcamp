@@ -131,7 +131,8 @@ app_hostname                 = "online.barcampmanchester.co.uk"
 letsencrypt_account_email    = "you@myemail.com"
 ```
 
-1. Install [Terraform](https://www.terraform.io/)
+1. Install [Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+   at least version 2.1.2 to avoid [certificate errors](https://github.com/vancluever/terraform-provider-acme/issues/154#issuecomment-783724506)
 1. Create a DigitalOcean account. Log in and select 'API' on the left sidebar,
    then create a new token. This is `do_token`.
 1. Install [doctl](https://docs.digitalocean.com/reference/doctl/) and then 
