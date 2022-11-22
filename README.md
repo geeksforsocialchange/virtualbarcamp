@@ -140,7 +140,9 @@ letsencrypt_account_email    = "you@myemail.com"
 1. Add three NS records for the subdomain you want to point to `ns1.digitalocean.com`,
    `ns2.digitalocean.com` and `ns3.digitalocean.com`
 1. Create a [GitLab account](https://gitlab.com) if you don't have one already
-1. Create a new repository with for your bot
+   1. Create a new repository with for your bot
+   1. Go to your group -> settings -> general and set visibility level to public
+   1. Go to the repository -> settings -> general and set visibility to public
 1. [Create a token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token) 
    with the read_registry permission. This is token_username and token_password.
 1. `cd terraform`
