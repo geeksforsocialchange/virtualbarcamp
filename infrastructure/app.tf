@@ -137,7 +137,7 @@ resource "kubernetes_deployment" "virtualbarcamp_www" {
 
         container {
           name  = "www"
-          image = "registry.gitlab.com/cnorthwood/virtualbarcamp:${var.app_version}"
+          image = "registry.gitlab.com/geeksforsocialchange/unbot:${var.app_version}"
           args  = ["www"]
 
           dynamic "env" {

@@ -145,10 +145,11 @@ letsencrypt_account_email    = "you@myemail.com"
    1. Go to the repository -> settings -> general and set visibility to public
 1. [Create a token](https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html#create-a-personal-access-token) 
    with the read_registry permission. This is token_username and token_password.
+1. Edit `infrastructure/app.tf#140` with your repository name (TODO: make this a variable)
 1. `cd terraform`
 1. `terraform init` (on first run only)
 1. `terraform apply -var-file secrets.tfvars` and enter the version of the app
-   you wish to deploy (e.g. `1`)
+   you wish to deploy, this is the git short hash (e.g. `bf1819ac`)
 1. If you have any migrations you need to apply, then you can run these like so:
 
 ```
